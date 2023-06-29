@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contacts",
+  "info": {
+    "singularName": "contact",
+    "pluralName": "contacts",
+    "displayName": "contact",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "email": {
+      "type": "email"
+    },
+    "username": {
+      "type": "string"
+    },
+    "dni": {
+      "type": "biginteger"
+    },
+    "telefono": {
+      "type": "biginteger"
+    },
+    "idCliente": {
+      "type": "string",
+      "unique": true
+    },
+    "fotoDNI": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": true
+    }
+  }
+}
