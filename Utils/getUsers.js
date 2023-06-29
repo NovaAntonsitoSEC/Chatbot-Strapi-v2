@@ -4,7 +4,7 @@ const isAUser = async (number) => {
     try{
     const options = {
         method : "get",
-        url : `http://localhost:1337/api/contacts?filters[telefono][$eq]=${number}`,
+        url : `https://strapi-5kbn.onrender.com/api/contactos?filters[telefono][$eq]=${number}`,
     }
     const response = await axios(options)
     if(response.data.data.length === 0){
@@ -23,7 +23,7 @@ const handleIDUnique = async (number) =>{
         console.log(idCliente);
         const options = {
             method: "get",
-            url: `http://localhost:1337/api/contacts?filters[idCliente][$eq]=${idCliente}`,
+            url: `https://strapi-5kbn.onrender.com/api/contactos?filters[idCliente][$eq]=${idCliente}`,
         }
  
         const response = await axios(options);

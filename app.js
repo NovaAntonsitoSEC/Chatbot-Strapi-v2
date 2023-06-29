@@ -113,7 +113,7 @@ async (ctx, { flowDynamic }) => {
                 // Configurar la solicitud POST con Axios
                 const options = {
                   method: 'post',
-                  url: 'http://localhost:1337/api/contacts',
+                  url: 'https://strapi-5kbn.onrender.com/api/contactos',
                   data: formData,
                   headers: {
                     'Content-Type': 'multipart/form-data'
