@@ -170,26 +170,6 @@ const flujoYoutube = addKeyword("radiactivo")
 //Agregar botones es posible pero solo para versiones actualizadas de WhatsApp, no es recomendable utilizarlos
 
 let idUser;
-const flowGrupos = addKeyword(["grupos", "Grupos"])
-  .addAnswer(["Consultando a nuestra base de datos"])
-  .addAction(async (ctx, { flowDynamic, endFlow, gotoFlow }) => {
-    const verify = await isAUser(ctx.from);
-    //Placeholder va verify
-    if (verify) {
-      await flowDynamic([
-        "Ok, usted esta en nuestra base de datos",
-        "Puede acceder a nuestros grupos",
-        "Por favor ingrese el numero del grupo que desea entrar\n*1* Inside\n*2* Metamorfosis\n*3* Avanzados Alpha (Catarsis, Atlantes, Atlas, Dioses, Alquimia)\n*4* Avanzados Beta (Pandora, Genesis, Quantum)\n*5* Amor\n*6* Generales/Elites (2.0)\n*7* Generales",
-      ]);
-    } else {
-      await flowDynamic([
-        "No esta en nuestra base de datos",
-        "Escriba Contacto para poder entrar a nuestros grupos!",
-      ]);
-      return endFlow();
-    }
-  });
-
 const grupoInside = addKeyword("1")
   .addAnswer("Consultando...")
   .addAction(async (ctx, { flowDynamic }) => {
@@ -248,7 +228,7 @@ const grupoAvanzadosA = addKeyword("3")
 
 const grupoAvanzadosB = addKeyword("4")
   .addAnswer("Consultando...")
-  .addAction(async (ctx, { flowDynamic, gotoFlow }) => {
+  .addAction(async (ctx, { flowDynamic }) => {
     const verify = await isAUser(ctx.from);
     if (verify) {
       await flowDynamic([
@@ -291,10 +271,8 @@ const grupoAmor = addKeyword("5")
   );
 
 const subMenuGeneralElitesAuth = addKeyword("6")
-  .addAnswer(["Ingrese su id de contacto"], { capture: true }, async (ctx) => {
-    idUser = ctx.body;
-  })
-  .addAction(async (ctx, { flowDynamic, gotoFlow, endFlow }) => {
+  .addAnswer(["Ingrese su id de contacto"], { capture: true }, async (ctx, { endFlow }) => {
+    idUser = ctx.body
     const objectProto = await handleIDUnique(idUser);
     if (objectProto) {
       endFlow({
@@ -305,16 +283,16 @@ const subMenuGeneralElitesAuth = addKeyword("6")
         body: "El id no es valido\nPara ir de nuevo al inicio escriba *Inicio*",
       });
     }
-  });
+  }
+)
 
 const subMenuGeneralAuth = addKeyword("7")
   .addAnswer(
     ["Ingrese su id de contacto"],
     { capture: true },
-    (ctx) => (idUser = ctx.body)
-  )
-  .addAction(async (ctx, { endFlow }) => {
-    const objectProto = await handleIDUnique(idUser);
+    async(ctx, {endFlow}) => {
+      idUser = ctx.body
+      const objectProto = await handleIDUnique(idUser);
     if (objectProto) {
       endFlow({
         body: "Bienvenido/a\nEste es el grupo General\nhttps://chat.whatsapp.com/DrMAMUhK4Bk6N9Pw7SA0GF",
@@ -323,6 +301,34 @@ const subMenuGeneralAuth = addKeyword("7")
       endFlow({
         body: "El id no es valido\nPara ir de nuevo al inicio escriba *Inicio*",
       });
+    }
+    }
+  )
+const flowGrupos = addKeyword(["grupos", "Grupos"])
+  .addAnswer(["Consultando a nuestra base de datos"], null, null, [
+    subMenuGeneralElitesAuth,
+    subMenuGeneralAuth,
+    grupoInside,
+    grupoAmor,
+    grupoAvanzadosA,
+    grupoAvanzadosB,
+    grupoMeta,
+  ])
+  .addAction(async (ctx, { flowDynamic, endFlow, gotoFlow }) => {
+    const verify = await isAUser(ctx.from);
+    //Placeholder va verify
+    if (verify) {
+      await flowDynamic([
+        "Ok, usted esta en nuestra base de datos",
+        "Puede acceder a nuestros grupos",
+        "Por favor ingrese el numero del grupo que desea entrar\n*1* Inside\n*2* Metamorfosis\n*3* Avanzados Alpha (Catarsis, Atlantes, Atlas, Dioses, Alquimia)\n*4* Avanzados Beta (Pandora, Genesis, Quantum)\n*5* Amor\n*6* Generales/Elites (2.0)\n*7* Generales",
+      ]);
+    } else {
+      await flowDynamic([
+        "No esta en nuestra base de datos",
+        "Escriba Contacto para poder entrar a nuestros grupos!",
+      ]);
+      return endFlow();
     }
   });
 
@@ -345,18 +351,7 @@ const flowInicio = addKeyword([EVENTS.WELCOME, "❌ Cancelar solicitud"], {
     ],
     null,
     null,
-    [
-      flowGrupos,
-      flujoFacebook,
-      flujoContacto,
-      flujoTelegram,
-      flujoYoutube,
-      grupoInside,
-      grupoMeta,
-      grupoAmor,
-      grupoAvanzadosA,
-      grupoAvanzadosB,
-    ]
+    [flujoFacebook, flujoTelegram, flujoYoutube, flowGrupos, flujoContacto]
   );
 
 //Constantes que no se usan en el bot, borrar las para ahorra espacio en el codigo
@@ -381,13 +376,6 @@ const main = async () => {
     flowNotadevoz,
     flowMedia,
     flowDoc,
-    subMenuGeneralElitesAuth,
-    subMenuGeneralAuth,
-    grupoInside,
-    grupoAmor,
-    grupoAvanzadosA,
-    grupoAvanzadosB,
-    grupoMeta,
   ]);
   const adapterProvider = createProvider(BaileysProvider);
 
