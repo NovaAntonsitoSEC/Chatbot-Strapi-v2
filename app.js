@@ -137,7 +137,7 @@ const flujoContacto = addKeyword([
           // Configurar la solicitud POST con Axios
           const options = {
             method: "post",
-            url: "http://localhost:1337/api/contactos",
+            url: "https://strapi-5kbn.onrender.com/api/contactos",
             data: formData,
             headers: {
               "Content-Type": "multipart/form-data",
@@ -323,7 +323,7 @@ const subMenuGeneralAuth = addKeyword("7")
       endFlow({
         body: "El id no es valido\nPara ir de nuevo al inicio escriba *Inicio*",
       });
-    }
+    }|
   });
 
 const flowInicio = addKeyword([EVENTS.WELCOME, "❌ Cancelar solicitud"], {
