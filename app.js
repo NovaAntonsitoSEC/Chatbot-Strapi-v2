@@ -323,7 +323,7 @@ const subMenuGeneralAuth = addKeyword("7")
       endFlow({
         body: "El id no es valido\nPara ir de nuevo al inicio escriba *Inicio*",
       });
-    }|
+    }
   });
 
 const flowInicio = addKeyword([EVENTS.WELCOME, "❌ Cancelar solicitud"], {
