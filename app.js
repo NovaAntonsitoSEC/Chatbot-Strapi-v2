@@ -345,7 +345,7 @@ const flowInicio = addKeyword([EVENTS.WELCOME, "❌ Cancelar solicitud"], {
     [
       "Escribe *Contacto* para incorporar tus datos al sistema",
       "Escribe *Grupos* para integrar los mismos según la conferencia tomada o si entrarás como inicial",
-      "Escribe *Facebook* para ayudar a la comunidad",
+      "Escribe *Facebook* Se parte de nuestra comunidad de Conferencias Internacionales y descubre el poder transformador de la resonancia y la hipnosis.",
       "Escribe *Radiactivo* videos interesantes para oirlos y comprenderlos",
       "Escribe *Telegram* información, audios y ejercicios sobre Resonancia",
     ],
