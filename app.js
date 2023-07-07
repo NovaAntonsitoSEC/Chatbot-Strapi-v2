@@ -17,6 +17,7 @@ const { downloadMediaMessage } = require("@adiwajshing/baileys");
 const fs = require("fs");
 const { isAUser, handleIDUnique } = require("./Utils/getUsers");
 const { log } = require("console");
+const { checkifImg } = require("./Utils/handleDNI");
 const DIR_IMGS = "./imgs";
 //Variables en memoria (Mala practica, cambiar urgente)
 let nombre_apellido;
@@ -44,11 +45,11 @@ const flujoContacto = addKeyword([
   .addAnswer(
     ["También necesito su email"],
     { capture: true },
-    async (ctx, { flowDynamic, endFlow }) => {
+    async (ctx, { flowDynamic, fallBack }) => {
       email = ctx.body;
       if (!ctx.body.includes("@")) {
         await flowDynamic("No es un email valido");
-        return endFlow();
+        return fallBack();
       }
       return flowDynamic(`Perfecto, un poquito mas`);
     }
@@ -56,7 +57,7 @@ const flujoContacto = addKeyword([
   .addAnswer(
     ["Ahora necesito una foto de su DNI"],
     { capture: true },
-    async (ctx, { flowDynamic }) => {
+    async (ctx, { flowDynamic , fallBack}) => {
       try {
         const buffer = await downloadMediaMessage(ctx, "buffer");
         const pathtoimg = `${process.cwd()}/imgs/${ctx.from}.jpg`;
@@ -65,8 +66,7 @@ const flujoContacto = addKeyword([
         });
         return true;
       } catch (error) {
-        console.error("Error writing file:", error);
-        return false;
+        return fallBack();
       }
     }
   )
@@ -270,9 +270,11 @@ const grupoAmor = addKeyword("5")
     }
   );
 
-const subMenuGeneralElitesAuth = addKeyword("6")
-  .addAnswer(["Ingrese su id de contacto"], { capture: true }, async (ctx, { endFlow }) => {
-    idUser = ctx.body
+const subMenuGeneralElitesAuth = addKeyword("6").addAnswer(
+  ["Ingrese su id de contacto"],
+  { capture: true },
+  async (ctx, { endFlow }) => {
+    idUser = ctx.body;
     const objectProto = await handleIDUnique(idUser);
     if (objectProto) {
       endFlow({
@@ -284,15 +286,14 @@ const subMenuGeneralElitesAuth = addKeyword("6")
       });
     }
   }
-)
+);
 
-const subMenuGeneralAuth = addKeyword("7")
-  .addAnswer(
-    ["Ingrese su id de contacto"],
-    { capture: true },
-    async(ctx, {endFlow}) => {
-      idUser = ctx.body
-      const objectProto = await handleIDUnique(idUser);
+const subMenuGeneralAuth = addKeyword("7").addAnswer(
+  ["Ingrese su id de contacto"],
+  { capture: true },
+  async (ctx, { endFlow }) => {
+    idUser = ctx.body;
+    const objectProto = await handleIDUnique(idUser);
     if (objectProto) {
       endFlow({
         body: "Bienvenido/a\nEste es el grupo General\nhttps://chat.whatsapp.com/DrMAMUhK4Bk6N9Pw7SA0GF",
@@ -302,8 +303,8 @@ const subMenuGeneralAuth = addKeyword("7")
         body: "El id no es valido\nPara ir de nuevo al inicio escriba *Inicio*",
       });
     }
-    }
-  )
+  }
+);
 const flowGrupos = addKeyword(["grupos", "Grupos"])
   .addAnswer(["Consultando a nuestra base de datos"], null, null, [
     subMenuGeneralElitesAuth,
