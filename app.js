@@ -55,7 +55,7 @@ const flujoContacto = addKeyword([
     }
   )
   .addAnswer(
-    ["Ahora necesito una foto de su DNI"],
+    ["Ahora necesito una foto de su Documento de Identidad"],
     { capture: true },
     async (ctx, { flowDynamic , fallBack}) => {
       try {
@@ -71,7 +71,7 @@ const flujoContacto = addKeyword([
     }
   )
   .addAnswer(
-    ["Dejeme su DNI"],
+    ["Dejeme el numero de su documento de identidad"],
     { capture: true },
 
     async (ctx, { flowDynamic }) => {
@@ -82,7 +82,7 @@ const flujoContacto = addKeyword([
         nombre_apellido.split(" ")[0]
       }*! te dejo el resumen de tu formulario
                 \n- Nombre y apellidos: ${nombre_apellido}
-                \n- DNI: *${dni}*
+                \n- Numero de Documento: *${dni}*
                 \n- Email: *${email}*
                 \n- Telefono: *${ctx.from}*`);
     }
