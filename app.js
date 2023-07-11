@@ -145,7 +145,7 @@ const flujoContacto = addKeyword([
           };
 
           const response = await axios(options);
-          await flowDynamic(`Perfecto, su id es #${scaled}`);
+          await flowDynamic(`Perfecto, su id es #${scaled}\nSi desea ir al menu principal Escriba *Inicio*`);
           return endFlow();
         } else {
           console.log("La imagen no fue encontrada");
@@ -162,7 +162,7 @@ const flujoFacebook = addKeyword(["Facebook", "facebook"]).addAnswer([
 ]);
 const flujoTelegram = addKeyword("telegram")
   .addAnswer("Encontraras ejercicios y audios de Marilu Carrillo")
-  .addAnswer("https://t.me/c/1495986832/502");
+  .addAnswer("https://t.me/c/1495986832/296 ");
 const flujoYoutube = addKeyword("radiactivo")
   .addAnswer("Videos y clases de Marilu Carrillo")
   .addAnswer("https://www.youtube.com/@SomosRadioactivo");
@@ -340,21 +340,18 @@ const flowInicio = addKeyword([EVENTS.WELCOME, "❌ Cancelar solicitud"], {
     "Bienvenido a los grupos de *Resonancia* de la *Doctora Marilu Carrillo*",
   ])
   .addAnswer(
-    "A continuación....encontrarás algunas de las opciones que ofrece RESONANCIA."
-  )
-  .addAnswer(
-    [
-      "Escribe *Contacto* para incorporar tus datos al sistema",
-      "Escribe *Grupos* para integrar los mismos según la conferencia tomada o si entrarás como inicial",
-      "Escribe *Facebook* Se parte de nuestra comunidad de Conferencias Internacionales y descubre el poder transformador de la resonancia y la hipnosis.",
-      "Escribe *Radiactivo* videos interesantes para oirlos y comprenderlos",
-      "Escribe *Telegram* información, audios y ejercicios sobre Resonancia",
-    ],
-    null,
-    null,
+    "A continuación....encontrarás algunas de las opciones que ofrece RESONANCIA.",
+    null, 
+    async (ctx, {flowDynamic})=>{
+       const verify = await isAUser(ctx.from)
+      if(!verify){
+        return flowDynamic("Escribe *Contacto* para incorporar tus datos al sistema\nEscribe *Grupos* para integrar los mismos según la conferencia tomada o si entrarás como inicial\nEscribe *Facebook* para ser parte de nuestra comunidad de Conferencias Internacionales y descubre el poder transformador de la resonancia y la hipnosis.\nEscribe *Radiactivo* videos interesantes para oirlos y comprenderlos\nEscribe *Telegram* información, audios y ejercicios sobre Resonancia")
+      }
+      return flowDynamic("Escribe *Grupos* para integrar los mismos según la conferencia tomada o si entrarás como inicial\nEscribe *Facebook* para ser parte de nuestra comunidad de Conferencias Internacionales y descubre el poder transformador de la resonancia y la hipnosis.\nEscribe *Radiactivo* videos interesantes para oirlos y comprenderlos\nEscribe *Telegram* información, audios y ejercicios sobre Resonancia")
+    },
     [flujoFacebook, flujoTelegram, flujoYoutube, flowGrupos, flujoContacto]
-  );
-
+  )
+  
 //Constantes que no se usan en el bot, borrar las para ahorra espacio en el codigo
 const flowNotadevoz = addKeyword([EVENTS.VOICE_NOTE]).addAnswer(
   "En un momento escuchamos tu mensaje"
