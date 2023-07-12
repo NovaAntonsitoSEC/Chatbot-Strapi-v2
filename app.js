@@ -202,7 +202,17 @@ const grupoMeta = addKeyword("2")
         "https://chat.whatsapp.com/K86Q8iD6tj6FIFltiA4uOF",
       ]);
     }
-  });
+  })
+  .addAnswer(
+    "Para ir de nuevo al inicio escriba *Inicio*",
+    { capture: true },
+    async (ctx, { gotoFlow }) => {
+      console.log(ctx.body);
+      if (ctx.body === "Inicio" || ctx.body === "inicio") {
+        gotoFlow(flowInicio);
+      }
+    }
+  );
 
 const grupoAvanzadosA = addKeyword("3")
   .addAnswer("Consultando...")
@@ -353,6 +363,7 @@ const flowInicio = addKeyword([EVENTS.WELCOME, "❌ Cancelar solicitud"], {
   )
   
 //Constantes que no se usan en el bot, borrar las para ahorra espacio en el codigo
+//Puras palidas este codigo dios mio 
 const flowNotadevoz = addKeyword([EVENTS.VOICE_NOTE]).addAnswer(
   "En un momento escuchamos tu mensaje"
 );

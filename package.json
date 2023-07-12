@@ -23,6 +23,7 @@
         "form-data": "^4.0.0",
         "is-image": "^3.1.0",
         "nodemon": "^2.0.22",
+        "pm2": "^5.3.0",
         "wa-sticker-formatter": "4.3.2"
     },
     "author": "",
