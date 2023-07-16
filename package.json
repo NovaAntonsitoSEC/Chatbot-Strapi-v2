@@ -6,7 +6,9 @@
     "scripts": {
         "pre-copy": "cd .. && npm run  copy.lib base-baileys-memory",
         "start": "node app.js",
-        "dev": "nodemon app.js"
+        "dev": "nodemon app.js",
+        "prod": "pm2 start app.js --name=BotActual",
+        "delete": "pm2 delete app.js"
     },
     "keywords": [],
     "dependencies": {

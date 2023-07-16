@@ -16,28 +16,29 @@ const { options } = require("nodemon/lib/config");
 const { downloadMediaMessage } = require("@adiwajshing/baileys");
 const fs = require("fs");
 const { isAUser, handleIDUnique } = require("./Utils/getUsers");
-const { log } = require("console");
 const { checkifImg } = require("./Utils/handleDNI");
 const DIR_IMGS = "./imgs";
 //Variables en memoria (Mala practica, cambiar urgente)
 let nombre_apellido;
 let dni;
 let email;
-
+let profesion;
+let nacionalidad;
 //TODO: Mover todos los flows a sus respectivos files
 //TODO: Todas las funciones tienen que tercerizarse
 const flujoContacto = addKeyword([
-  "contacto",
-  "⬅️ Volver al Inicio",
+  "A",
   "Contacto",
 ])
   .addAnswer(
     [
-      "Bien, ahora vamos a necesitar su nombre y apellido!",
+      "Bien, ahora vamos a necesitar sus nombres y apellidos!",
       "Ingreselo a continuacion",
+      "Recuerde que para volver a menu principal escriba *Inicio*"
     ],
     { capture: true },
-    async (ctx, { flowDynamic }) => {
+    async (ctx, { flowDynamic, gotoFlow }) => {
+      if(ctx.body === "Inicio" || ctx.body === "inicio") return gotoFlow(flowInicio)
       nombre_apellido = ctx.body;
       return flowDynamic(`Encantado *${nombre_apellido}*, continuamos...`);
     }
@@ -46,6 +47,7 @@ const flujoContacto = addKeyword([
     ["También necesito su email"],
     { capture: true },
     async (ctx, { flowDynamic, fallBack }) => {
+      if(ctx.body === "Inicio" || ctx.body === "inicio") return gotoFlow(flowInicio)
       email = ctx.body;
       if (!ctx.body.includes("@")) {
         await flowDynamic("No es un email valido");
@@ -55,7 +57,7 @@ const flujoContacto = addKeyword([
     }
   )
   .addAnswer(
-    ["Ahora necesito una foto de su Documento de Identidad"],
+    ["Ahora necesito una foto de su *INE/id/Pasaporte/Dni*"],
     { capture: true },
     async (ctx, { flowDynamic , fallBack}) => {
       try {
@@ -69,7 +71,25 @@ const flujoContacto = addKeyword([
         return fallBack();
       }
     }
-  )
+  ).addAnswer(
+    "Bien! Ahora necesito su profesion",{capture: true},async(ctx,{fallBack,flowDynamic})=>{
+      if(ctx.body.length === 0){  
+        if(ctx.body === "Inicio" || ctx.body === "inicio") return gotoFlow(flowInicio)
+        await flowDynamic("Ingrese su profesion")
+        return fallBack()
+      }
+      profesion = ctx.body
+      return flowDynamic("Gracias!")
+    }
+  ).addAnswer("Tambien su nacionalidad!", {capture : true}, async(ctx, {fallBack,flowDynamic})=>{
+    if(ctx.body.length === 0){
+      if(ctx.body === "Inicio" || ctx.body === "inicio") return gotoFlow(flowInicio)
+      await flowDynamic("Ingrese su nacionalidad")
+      return fallBack()
+    }
+    nacionalidad = ctx.body
+    return flowDynamic("Un paso mas!")
+  })
   .addAnswer(
     ["Dejeme el numero de su documento de identidad"],
     { capture: true },
@@ -84,7 +104,9 @@ const flujoContacto = addKeyword([
                 \n- Nombre y apellidos: ${nombre_apellido}
                 \n- Numero de Documento: *${dni}*
                 \n- Email: *${email}*
-                \n- Telefono: *${ctx.from}*`);
+                \n- Telefono: *${ctx.from}*
+                \n- Nacionalidad : *${nacionalidad}*
+                \n- Profesion: *${profesion}*`);
     }
   )
   .addAnswer(["Sus datos han sido guardados..."])
@@ -95,6 +117,7 @@ const flujoContacto = addKeyword([
       /*
        * IMPORTANTE: El bot necesita un cambio completo en su codigo, ya que contacto se puede repetir infinita veces
        * y un ataque malicioso puede repetir muchas veces este proceso y sobrecargar la base de datos
+       * 
        */
       let random = Math.random();
       let scaled = Math.floor(Math.floor(random * 9999) + 1);
@@ -127,10 +150,12 @@ const flujoContacto = addKeyword([
           let json = {
             data: {
               username: nombre_apellido,
-              dni: dni,
+              nroDocumento: dni,
               email: email,
               telefono: ctx.from,
               idCliente: `#${scaled}`,
+              nacionalidad : nacionalidad,
+              profesion : profesion
             },
           };
           formData.append("data", JSON.stringify(json.data));
@@ -156,14 +181,14 @@ const flujoContacto = addKeyword([
     }
   });
 
-const flujoFacebook = addKeyword(["Facebook", "facebook"]).addAnswer([
+const flujoFacebook = addKeyword(["C", "facebook"]).addAnswer([
   "Darle like, seguir la página y dejar comentarios sobre la experiencia con la doctora.",
   "https://www.facebook.com/DraMontesCarrillo?mibextid=LQQJ4d",
 ]);
-const flujoTelegram = addKeyword("telegram")
+const flujoTelegram = addKeyword(["E"])
   .addAnswer("Encontraras ejercicios y audios de Marilu Carrillo")
   .addAnswer("https://t.me/c/1495986832/296 ");
-const flujoYoutube = addKeyword("radiactivo")
+const flujoYoutube = addKeyword(["D"])
   .addAnswer("Videos y clases de Marilu Carrillo")
   .addAnswer("https://www.youtube.com/@SomosRadioactivo");
 
@@ -315,7 +340,16 @@ const subMenuGeneralAuth = addKeyword("7").addAnswer(
     }
   }
 );
-const flowGrupos = addKeyword(["grupos", "Grupos"])
+
+const negativa = addKeyword(["posibleError"]).addAnswer(["No se encuentra en nuestra base de datos" , "Escriba *Inicio* si desea ir al menu principal!"],
+{capture: true},
+(ctx, {gotoFlow})=>{
+    if(ctx.body || ctx.body === "Inicio"|| ctx.body === "inicio"){
+      return gotoFlow(flowInicio)
+    }
+
+})
+const flowGrupos = addKeyword(["B", "Grupos"])
   .addAnswer(["Consultando a nuestra base de datos"], null, null, [
     subMenuGeneralElitesAuth,
     subMenuGeneralAuth,
@@ -324,8 +358,9 @@ const flowGrupos = addKeyword(["grupos", "Grupos"])
     grupoAvanzadosA,
     grupoAvanzadosB,
     grupoMeta,
+    negativa
   ])
-  .addAction(async (ctx, { flowDynamic, endFlow, gotoFlow }) => {
+  .addAction(async (ctx, { flowDynamic, gotoFlow }) => {
     const verify = await isAUser(ctx.from);
     //Placeholder va verify
     if (verify) {
@@ -335,13 +370,11 @@ const flowGrupos = addKeyword(["grupos", "Grupos"])
         "Por favor ingrese el numero del grupo que desea entrar\n*1* Inside\n*2* Metamorfosis\n*3* Avanzados Alpha (Catarsis, Atlantes, Atlas, Dioses, Alquimia)\n*4* Avanzados Beta (Pandora, Genesis, Quantum)\n*5* Amor\n*6* Generales/Elites (2.0)\n*7* Generales",
       ]);
     } else {
-      await flowDynamic([
-        "No esta en nuestra base de datos",
-        "Escriba Contacto para poder entrar a nuestros grupos!",
-      ]);
-      return endFlow();
+      return gotoFlow(negativa)
     }
   });
+
+
 
 const flowInicio = addKeyword([EVENTS.WELCOME, "❌ Cancelar solicitud"], {
   sensitive: false,
@@ -355,15 +388,16 @@ const flowInicio = addKeyword([EVENTS.WELCOME, "❌ Cancelar solicitud"], {
     async (ctx, {flowDynamic})=>{
        const verify = await isAUser(ctx.from)
       if(!verify){
-        return flowDynamic("Escribe *Contacto* para incorporar tus datos al sistema\nEscribe *Grupos* para integrar los mismos según la conferencia tomada o si entrarás como inicial\nEscribe *Facebook* para ser parte de nuestra comunidad de Conferencias Internacionales y descubre el poder transformador de la resonancia y la hipnosis.\nEscribe *Radiactivo* videos interesantes para oirlos y comprenderlos\nEscribe *Telegram* información, audios y ejercicios sobre Resonancia")
+        return flowDynamic("Escribe *A* para incorporar tus *datos* al sistema\nEscribe *B* para entrar a *grupos* e integrar los mismos según la conferencia tomada o si entrarás como inicial\nEscribe *C* entrar a *Facebook* y ser parte de nuestra comunidad de Conferencias Internacionales y descubre el poder transformador de la resonancia y la hipnosis.\nEscribe *D* para entrar a *Somos Radiactivo* y ver nuestros videos interesantes para oirlos y comprenderlos\nEscribe *E* para entrar a nuestro *Telegram* y usar nuestra información, audios y ejercicios sobre Resonancia")
       }
-      return flowDynamic("Escribe *Grupos* para integrar los mismos según la conferencia tomada o si entrarás como inicial\nEscribe *Facebook* para ser parte de nuestra comunidad de Conferencias Internacionales y descubre el poder transformador de la resonancia y la hipnosis.\nEscribe *Radiactivo* videos interesantes para oirlos y comprenderlos\nEscribe *Telegram* información, audios y ejercicios sobre Resonancia")
+      return flowDynamic("Escribe *B* para entrar a *grupos* e integrar los mismos según la conferencia tomada o si entrarás como inicial\nEscribe *C* entrar a *Facebook* y ser parte de nuestra comunidad de Conferencias Internacionales y descubre el poder transformador de la resonancia y la hipnosis.\nEscribe *D* para entrar a *Somos Radiactivo* y ver nuestros videos interesantes para oirlos y comprenderlos\nEscribe *E* para entrar a nuestro *Telegram* y usar nuestra información, audios y ejercicios sobre Resonancia")
     },
     [flujoFacebook, flujoTelegram, flujoYoutube, flowGrupos, flujoContacto]
   )
   
 //Constantes que no se usan en el bot, borrar las para ahorra espacio en el codigo
 //Puras palidas este codigo dios mio 
+
 const flowNotadevoz = addKeyword([EVENTS.VOICE_NOTE]).addAnswer(
   "En un momento escuchamos tu mensaje"
 );
